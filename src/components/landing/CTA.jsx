@@ -1,11 +1,10 @@
+import { ArrowRight, Sparkles } from "lucide-react";
+
 const CTA = () => {
   return (
-    <section className="cta-section">
-      <div className="cta-content">
-
-        <span className="cta-label">
-          READY TO GET STARTED?
-        </span>
+    <section className="cta-wrap">
+      <div className="cta-section">
+        <Sparkles className="cta-spark" size={40} strokeWidth={1.4} aria-hidden="true" />
 
         <h2>
           Your next opportunity
@@ -14,14 +13,15 @@ const CTA = () => {
         </h2>
 
         <p>
-          Start your journey with TREVA today.
+          Join thousands of professionals who
+          <br />
+          have already found their dream jobs with TREVA.
         </p>
 
         <button className="cta-button">
           Get Started
-          <span>→</span>
+          <ArrowRight size={15} />
         </button>
-
       </div>
     </section>
   );
