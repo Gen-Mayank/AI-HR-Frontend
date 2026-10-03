@@ -1,4 +1,4 @@
-import whyTrevaImage from "../../assets/images/why-treva.png";
+import whyTrevaImage from "../../assets/job-finder-2.jpg";
 
 const WhyTreva = () => {
   return (
