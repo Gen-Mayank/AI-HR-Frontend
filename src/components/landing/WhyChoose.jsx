@@ -100,10 +100,6 @@ const WhyChoose = () => {
 
               <p>{feature.description}</p>
 
-              <button className="card-arrow">
-                →
-              </button>
-
             </div>
           ))}
         </div>
