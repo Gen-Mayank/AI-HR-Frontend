@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <header className="navbar-wrapper">
@@ -26,7 +28,7 @@ const Navbar = () => {
 
           <div className="mobile-auth">
             <span>Already have an account?</span>
-            <button className="login-btn">Login</button>
+           <button className="login-btn" onClick={() => navigate("/login")}>Login</button>
             <button className="primary-btn">Get Started</button>
           </div>
         </div>
@@ -36,9 +38,9 @@ const Navbar = () => {
             Already have an account?
           </span>
 
-          <button className="login-btn">
-            Login
-          </button>
+        <button className="login-btn" onClick={() => navigate("/login")}>
+          Login
+        </button>
 
           <button className="primary-btn">
             Get Started
