@@ -1,104 +1,83 @@
 import { useState } from "react";
+import { ArrowLeft, ArrowRight, Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Sarah Johnson",
-    role: "HR Manager",
-    quote:
-      "TREVA has made managing our entire HR process much simpler. Our team can finally focus on what matters.",
-  },
-  {
-    name: "Michael Davis",
+    name: "Ananya Sharma",
     role: "Software Engineer",
-    quote:
-      "Finding the right opportunity became much easier. TREVA helped me discover a role that matched my goals.",
+    quote: "TREVA made my job search so much easier. The platform is simple, fast and the recommendations are actually relevant.",
   },
   {
-    name: "Priya Sharma",
-    role: "Talent Specialist",
-    quote:
-      "The platform is simple, modern and incredibly useful for connecting great people with great companies.",
+    name: "Rohit Mehta",
+    role: "Data Analyst",
+    quote: "I found my current role through TREVA. The filters and job suggestions really helped me focus on the right opportunities.",
+  },
+  {
+    name: "Priya Singh",
+    role: "Product Designer",
+    quote: "Great platform with genuine companies and a clean interface. Highly recommended for freshers and experienced professionals!",
   },
 ];
 
 const Testimonials = () => {
-  const [active, setActive] = useState(0);
+  const [start, setStart] = useState(0);
 
-  const previous = () => {
-    setActive((current) =>
-      current === 0 ? testimonials.length - 1 : current - 1
-    );
-  };
+  const previous = () =>
+    setStart((c) => (c === 0 ? testimonials.length - 1 : c - 1));
 
-  const next = () => {
-    setActive((current) =>
-      current === testimonials.length - 1 ? 0 : current + 1
-    );
-  };
+  const next = () => setStart((c) => (c + 1) % testimonials.length);
+
+  // rotate the list so the arrows cycle through the stories
+  const visible = testimonials.map(
+    (_, i) => testimonials[(start + i) % testimonials.length]
+  );
 
   return (
     <section className="testimonials-section">
-      <div className="section-heading">
-        <span className="section-label">
-          SUCCESS STORIES
-        </span>
+      <div className="testimonials-container">
 
-        <h2>
-          People love TREVA.
-        </h2>
+        {/* heading left, arrows right */}
+        <div className="testimonials-head">
+          <div>
+            <span className="pill">SUCCESS STORIES</span>
+            <h2>What our users say</h2>
+          </div>
 
-        <p>
-          See how TREVA helps people move forward.
-        </p>
-      </div>
-
-      <div className="testimonial-wrapper">
-
-        <button
-          className="testimonial-nav"
-          onClick={previous}
-          aria-label="Previous testimonial"
-        >
-          ←
-        </button>
+          <div className="testimonial-controls">
+            <button className="testimonial-nav" onClick={previous} aria-label="Previous testimonial">
+              <ArrowLeft size={16} />
+            </button>
+            <button className="testimonial-nav" onClick={next} aria-label="Next testimonial">
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        </div>
 
         <div className="testimonial-grid">
-          {testimonials.map((testimonial, index) => (
-            <article
-              className={`testimonial-card ${
-                index === active ? "testimonial-active" : ""
-              }`}
-              key={testimonial.name}
-            >
-              <div className="stars">
-                ★★★★★
-              </div>
+          {visible.map((t) => (
+            <article className="testimonial-card" key={t.name}>
+              <span className="quote-mark" aria-hidden="true">“</span>
 
-              <p className="testimonial-quote">
-                "{testimonial.quote}"
-              </p>
+              <p className="testimonial-quote">“{t.quote}”</p>
 
-              <div className="testimonial-user">
-                <div className="avatar">
-                  {testimonial.name.charAt(0)}
+              <div className="testimonial-footer">
+                <div className="testimonial-user">
+                  <span className="avatar">{t.name.charAt(0)}</span>
+                  <div>
+                    <strong>{t.name}</strong>
+                    <span>{t.role}</span>
+                  </div>
                 </div>
 
-                <div>
-                  <strong>{testimonial.name}</strong>
-                  <span>{testimonial.role}</span>
+                <div className="stars" aria-label="5 out of 5 stars">
+                  {[0, 1, 2, 3, 4].map((i) => (
+                    <Star key={i} size={12} fill="currentColor" strokeWidth={0} />
+                  ))}
                 </div>
               </div>
             </article>
           ))}
         </div>
-
-        <button
-          className="testimonial-nav"
-          onClick={next}
-          aria-label="Next testimonial"
-        >
-          →
-        </button>
 
       </div>
     </section>
