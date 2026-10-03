@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+
+import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import HRDashboard from "./pages/HRDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
@@ -8,13 +10,12 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-              <Route path="/" element={<Login />} />
-              <Route path="/hr" element={<HRDashboard />} />
-              <Route path="/employee" element={<EmployeeDashboard />} />
-              <Route path="/job-seeker" element={<JobSeekerDashboard />} />
-          </Routes>
-         
-          
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/hr" element={<HRDashboard />} />
+        <Route path="/employee" element={<EmployeeDashboard />} />
+        <Route path="/job-seeker" element={<JobSeekerDashboard />} />
+      </Routes>
     </BrowserRouter>
   );
 }
