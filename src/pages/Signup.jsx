@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { signup } from "../services/authService";
 
 import signupIllustration from "../assets/signup-illustration.jpeg";
 import "./Signup.css";
@@ -60,22 +61,34 @@ function Signup() {
     }
 
     try {
-      setLoading(true);
+  setLoading(true);
 
-      // TODO: connect your backend here, for example:
-      // await axios.post("/api/auth/register", {
-      //   name: formData.fullName,
-      //   email: formData.email,
-      //   role: formData.role,
-      //   password: formData.password,
-      // });
+  const nameParts = formData.fullName.trim().split(/\s+/);
 
-      navigate("/login");
-    } catch {
-      setError("Sign up failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
+  const roleMap = {
+    "job-seeker": "JOB_SEEKER",
+    employee: "EMPLOYEE",
+    hr: "HR",
+  };
+
+  await signup({
+    first_name: nameParts[0],
+    last_name: nameParts.slice(1).join(" "),
+    email: formData.email,
+    password: formData.password,
+    role: roleMap[formData.role],
+  });
+
+  navigate("/login");
+} catch (error) {
+  setError(
+    error.response?.data?.email?.[0] ||
+    error.response?.data?.detail ||
+    "Sign up failed. Please try again."
+  );
+} finally {
+  setLoading(false);
+}
   };
 
   return (

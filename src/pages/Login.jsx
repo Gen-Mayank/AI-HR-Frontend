@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import loginIllustration from "../assets/login-illustration.png";
 import "./Login.css";
+import { login } from "../services/authService";
 
 function Login() {
   const navigate = useNavigate();
@@ -35,18 +36,42 @@ function Login() {
     }
 
     try {
-      setLoading(true);
+  setLoading(true);
 
-      // TODO: connect your backend here, for example:
-      // const { data } = await axios.post("/api/auth/login", formData);
-      // then navigate by role: "/hr", "/employee" or "/job-seeker"
+  const data = await login({
+    username: formData.email,
+    password: formData.password,
+  });
 
-      navigate("/job-seeker");
-    } catch {
-      setError("Login failed. Check your details and try again.");
-    } finally {
-      setLoading(false);
+  localStorage.setItem("access_token", data.access);
+  localStorage.setItem("refresh_token", data.refresh);
+
+  const roleResponse = await fetch(
+    "http://127.0.0.1:8000/api/auth/me/",
+    {
+      headers: {
+        Authorization: `Bearer ${data.access}`,
+      },
     }
+  );
+
+  const user = await roleResponse.json();
+
+  if (user.role === "HR") {
+    navigate("/hr");
+  } else if (user.role === "EMPLOYEE") {
+    navigate("/employee");
+  } else {
+    navigate("/job-seeker");
+  }
+} catch (error) {
+  setError(
+    error.response?.data?.detail ||
+    "Login failed. Check your details and try again."
+  );
+} finally {
+  setLoading(false);
+}
   };
 
   return (
