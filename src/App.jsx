@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import HRDashboard from "./pages/HRDashboard";
 import EmployeeDashboard from "./pages/EmployeeDashboard";
 import JobSeekerDashboard from "./pages/JobSeekerDashboard";
+import JobDescription from "./pages/JobDescription";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/hr" element={<HRDashboard />} />
         <Route path="/employee" element={<EmployeeDashboard />} />
         <Route path="/job-seeker" element={<JobSeekerDashboard />} />
+        <Route path="/job-description" element={<JobDescription />} />
       </Routes>
     </BrowserRouter>
   );
