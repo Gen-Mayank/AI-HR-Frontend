@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import "./ApplicationPage.css";
+import ApplicationSent from "./ApplicationSent";
 
 const defaultSkills = ["Django", "Python", "PostgreSQL", "REST APIs", "Docker"];
 
@@ -30,8 +31,8 @@ function Icon({ name, size = 18 }) {
 }
 
 export default function Application({
-  jobTitle = "Backend Engineer (Django)",
-  company = "AlphaTech",
+  jobTitle = "Senior Frontend Engineer",
+  company = "Stripe",
   jobMeta = "Remote · Full-time",
   onBack,
   onSubmit,
@@ -56,7 +57,8 @@ export default function Application({
 
   const [skills, setSkills] = useState(defaultSkills);
   const [skillInput, setSkillInput] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [showApplicationSent, setShowApplicationSent] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const update = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -87,11 +89,159 @@ export default function Application({
 
   const coverCount = useMemo(() => form.coverNote.length, [form.coverNote]);
 
+  const validateForm = () => {
+    const newErrors = {};
+
+  // Full Name
+    if (!form.fullName.trim()) {
+      newErrors.fullName = "Full name is required";
+    } else if (!/^[A-Za-z\s]{2,50}$/.test(form.fullName.trim())) {
+     newErrors.fullName = "Enter a valid full name";
+    }
+
+  // Email
+    if (!form.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (
+      !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(
+        form.email.trim()
+      )
+    ) {
+      newErrors.email = "Enter a valid email address";
+    }
+
+  // Phone Number
+    let phone = form.phone.replace(/\D/g, "");
+
+  // If user enters +91XXXXXXXXXX, remove 91
+    if (phone.length === 12 && phone.startsWith("91")) {
+      phone = phone.slice(2);
+    }
+
+    if (!phone) {
+      newErrors.phone = "Phone number is required";
+    } else if (!/^[6-9]\d{9}$/.test(phone)) {
+      newErrors.phone = "Enter a valid 10-digit phone number";
+    }
+
+  // Current Location
+    if (!form.location.trim()) {
+      newErrors.location = "Current location is required";
+    }
+
+  // GitHub / Portfolio
+  if (!form.github.trim()) {
+    newErrors.github = "GitHub / Portfolio link is required";
+  } else if (
+    !/^https?:\/\/(www\.)?github\.com\/.+/i.test(form.github.trim())
+  ) {
+    newErrors.github = "Enter a valid GitHub URL";
+  }
+
+  // Total Experience
+  if (!form.experience) {
+    newErrors.experience = "Please select your experience";
+  }
+
+  // Notice Period
+  if (!form.notice) {
+    newErrors.notice = "Please select your notice period";
+  }
+
+  // Current CTC
+  const currentCtc = form.currentCtc.replace(/,/g, "").trim();
+
+  if (!currentCtc) {
+    newErrors.currentCtc = "Current CTC is required";
+  } else if (!/^\d+$/.test(currentCtc)) {
+    newErrors.currentCtc = "Enter a valid CTC";
+  }
+
+  // Expected CTC
+  const expectedCtc = form.expectedCtc.replace(/,/g, "").trim();
+
+  if (!expectedCtc) {
+    newErrors.expectedCtc = "Expected CTC is required";
+  } else if (!/^\d+$/.test(expectedCtc)) {
+    newErrors.expectedCtc = "Enter a valid CTC";
+  }
+
+  // Expected CTC should not be less than Current CTC
+  if (
+    currentCtc &&
+    expectedCtc &&
+    /^\d+$/.test(currentCtc) &&
+    /^\d+$/.test(expectedCtc) &&
+    Number(expectedCtc) < Number(currentCtc)
+  ) {
+    newErrors.expectedCtc =
+      "Expected CTC cannot be less than current CTC";
+  }
+
+  // Resume
+  if (!form.resume) {
+    newErrors.resume = "Please upload your resume";
+  } else {
+    const allowedTypes = [
+      "application/pdf",
+      "application/msword",
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    ];
+
+    const fileName = form.resume.name.toLowerCase();
+
+    const validExtension =
+      fileName.endsWith(".pdf") ||
+      fileName.endsWith(".doc") ||
+      fileName.endsWith(".docx");
+
+    if (
+      !allowedTypes.includes(form.resume.type) &&
+      !validExtension
+    ) {
+      newErrors.resume = "Only PDF, DOC or DOCX files are allowed";
+    }
+
+    if (form.resume.size > 10 * 1024 * 1024) {
+      newErrors.resume = "Resume must be smaller than 10MB";
+    }
+  }
+
+  // Cover Note
+  if (!form.coverNote.trim()) {
+    newErrors.coverNote = "Cover note is required";
+  } else if (form.coverNote.trim().length < 20) {
+    newErrors.coverNote =
+      "Cover note must contain at least 20 characters";
+  }
+
+  // Consent
+  if (!form.consent) {
+    newErrors.consent =
+      "Please confirm the details and agree to the Terms and Privacy Policy";
+  }
+
+  setErrors(newErrors);
+
+  return Object.keys(newErrors).length === 0;
+};
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    if (!form.consent) return;
-    setSubmitted(true);
+
+    // First validate EVERYTHING
+    const isValid = validateForm();
+
+    // If anything is wrong, STOP here
+    if (!isValid) {
+      return;
+    }
+
+  // Only after every check passes:
     onSubmit?.({ ...form, skills });
+
+  // Show success popup
+    setShowApplicationSent(true);
   };
 
   return (
@@ -129,6 +279,7 @@ export default function Application({
                 value={form.fullName}
                 onChange={(e) => update("fullName", e.target.value)}
                 placeholder="Your full name"
+                error={errors.fullName}
               />
               <Field
                 label="Email Address"
@@ -136,24 +287,28 @@ export default function Application({
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}
                 placeholder="you@example.com"
+                error={errors.email}
               />
               <Field
                 label="Phone Number"
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
                 placeholder="+91   98765 43210"
+                error={errors.phone}
               />
               <Field
                 label="Current Location"
                 value={form.location}
                 onChange={(e) => update("location", e.target.value)}
                 placeholder="City, State"
+                error={errors.location}
               />
               <Field
                 label="GitHub / Portfolio Link"
                 value={form.github}
                 onChange={(e) => update("github", e.target.value)}
                 placeholder="https://github.com/yourname"
+                error={errors.github}
               />
               <Field
                 label="LinkedIn Profile"
@@ -172,6 +327,7 @@ export default function Application({
                 value={form.experience}
                 onChange={(e) => update("experience", e.target.value)}
                 options={["Select years", "Fresher", "1 year", "2 years", "3 years", "4+ years"]}
+                error={errors.experience}
               />
 
               <Field
@@ -187,6 +343,7 @@ export default function Application({
                 value={form.notice}
                 onChange={(e) => update("notice", e.target.value)}
                 options={["Select notice period", "Immediate", "15 days", "30 days", "60 days", "90 days"]}
+                error={errors.notice}
               />
 
               <Field
@@ -195,6 +352,7 @@ export default function Application({
                 value={form.currentCtc}
                 onChange={(e) => update("currentCtc", e.target.value)}
                 placeholder="e.g. 6,00,000"
+                error={errors.currentCtc}
               />
 
               <Field
@@ -203,6 +361,7 @@ export default function Application({
                 value={form.expectedCtc}
                 onChange={(e) => update("expectedCtc", e.target.value)}
                 placeholder="e.g. 10,00,000"
+                error={errors.expectedCtc}
               />
 
               <div className="field work-preference">
@@ -281,6 +440,11 @@ export default function Application({
                     </>
                   )}
                 </label>
+                {errors.resume && (
+                  <span className="field-error">
+                    {errors.resume}
+                  </span>
+                )}
               </div>
 
               <div className="field cover-field">
@@ -294,6 +458,11 @@ export default function Application({
                   />
                   <span>{coverCount} / 500</span>
                 </div>
+                  {errors.coverNote && (
+                    <span className="field-error">
+                      {errors.coverNote}
+                    </span>
+                  )}
               </div>
             </div>
 
@@ -311,19 +480,39 @@ export default function Application({
                 <a href="/privacy" onClick={(e) => e.stopPropagation()}>Privacy Policy</a>.
               </span>
             </label>
-
-            <button className="submit-button" type="submit" disabled={!form.consent}>
-              {submitted ? "Application Submitted" : "Submit Application"}
-            </button>
-
-            {submitted && (
-              <p className="success-message">
-                Your application has been submitted successfully.
-              </p>
+            {errors.consent && (
+              <span className="field-error consent-error">
+                {errors.consent}
+              </span>
             )}
+
+            <button
+              className="submit-button"
+              type="submit"
+            >
+              Submit Application
+            </button>
+            
           </form>
         </main>
-      </div>
+           </div>
+
+      {showApplicationSent && (
+        <ApplicationSent
+          jobTitle={jobTitle}
+          company={company}
+          onReturnDashboard={() => {
+            // Put your dashboard navigation here
+            // Example:
+            // navigate("/job-seeker-dashboard");
+          }}
+          onViewApplications={() => {
+            // Put your applications navigation here
+            // Example:
+            // navigate("/my-applications");
+          }}
+        />
+      )}
     </div>
   );
 }
@@ -338,35 +527,68 @@ function SectionHeader({ icon, title }) {
   );
 }
 
-function Field({ label, optional, prefix, ...props }) {
+function Field({
+  label,
+  optional,
+  prefix,
+  error,
+  ...props
+}) {
   return (
     <div className="field">
       <label>
         {label}
         {optional && <span className="optional">Optional</span>}
       </label>
+
       <div className={prefix ? "input-with-prefix" : undefined}>
         {prefix && <span>{prefix}</span>}
-        <input {...props} />
+
+        <input
+          {...props}
+          className={error ? "input-error" : ""}
+        />
       </div>
+
+      {error && (
+        <span className="field-error">
+          {error}
+        </span>
+      )}
     </div>
   );
 }
 
-function SelectField({ label, options, ...props }) {
+function SelectField({
+  label,
+  options,
+  error,
+  ...props
+}) {
   return (
     <div className="field">
       <label>{label}</label>
-      <div className="select-wrap">
+
+      <div className={`select-wrap ${error ? "input-error" : ""}`}>
         <select {...props}>
           {options.map((option) => (
-            <option key={option} value={option === options[0] ? "" : option}>
+            <option
+              key={option}
+              value={option === options[0] ? "" : option}
+            >
               {option}
             </option>
           ))}
         </select>
+
         <Icon name="chevron" size={16} />
       </div>
+
+      {error && (
+        <span className="field-error">
+          {error}
+        </span>
+      )}
     </div>
   );
 }
